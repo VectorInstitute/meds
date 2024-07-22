@@ -51,12 +51,6 @@ def read_fn(sp_dir: Path, unique_by: list[str] | str | None) -> pl.LazyFrame:
 def write_fn(df: pl.LazyFrame, out_fp: Path) -> None:
     df.collect().write_parquet(out_fp, use_pyarrow=True)
 
-# def write_fn(df: pl.LazyFrame, out_fp: Path, chunk_size: int = 10_000_000) -> None:
-#     for i, chunk in enumerate(df.collect(streaming=True, chunk_size=chunk_size)):
-#         out_fp = f"/{outfp}_{sp}_{i}.parquet"
-#         chunk.write_parquet(out_fp, use_pyarrow=True, append=True)
-
-
 def identity_fn(df: pl.LazyFrame) -> pl.LazyFrame:
     return df
 

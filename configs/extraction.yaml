@@ -24,7 +24,15 @@ stages:
   - split_and_shard_patients
   - convert_to_sharded_events
   - merge_to_MEDS_cohort
-  - collect_code_metadata
+  - filter_rows_and_cols
+  - filter_patients
+  - add_time_interval
+  - add_reg
+  - add_embedding_columns
+  - filter_labs
+  - quantize_lab_values
+  - generate_sequence
+  # - collect_code_metadata
 
 stage_configs:
   shard_events:
@@ -56,8 +64,8 @@ stage_configs:
     external_splits_json_fp: null
     split_fracs:
       train: 1
-      tuning: 0
-      held_out: 0
+      # tuning: 0
+      # held_out: 0
 
   merge_to_MEDS_cohort:
     description: |-
@@ -70,20 +78,71 @@ stage_configs:
         - `split_fracs`: The fraction of patients to include in the IID training, tuning, and held-out sets.
     output_dir: ${cohort_dir}/final_cohort
     unique_by: "*"
-
-  collect_code_metadata:
+    
+  filter_rows_and_cols:
+    data_input_dir: ${cohort_dir}/final_cohort
+    output_dir: ${cohort_dir}/prep_cohort
+    columns_to_keep: ["patient_id", "code", "timestamp", "genc_id", "age", "discharge_disposition", "lab_value"]
+  
+  filter_patients:
+    min_events_per_patient: 10
+    min_measurements_per_patient: null
+    output_dir: ${cohort_dir}/prep_1_cohort 
+    
+  add_time_interval:
+    discharge_code: "DISCHARGE//VE"
+    interval_prefix: "INTERVAL"
+    output_dir: ${cohort_dir}/prep_interval_cohort
+    
+  add_reg:
     description: |-
-      This stage collects some descriptive metadata about the codes in the cohort. Arguments:
-        - `aggregations`: The aggregations to compute over the codes. Defaults to counts of code occurrences,
-          counts of patients with the code, and counts of value occurrences per code, as well as the sum and
-          sum of squares of values (for use in computing means and variances).
-    aggregations:
-      - "code/n_occurrences"
-      - "code/n_patients"
-      - "values/n_occurrences"
-      - "values/sum"
-      - "values/sum_sqd"
-    do_summarize_over_all_codes: true # This indicates we should include overall, code-independent counts
-    is_metadata: True
-    mapper_output_dir: "${cohort_dir}/code_metadata"
-    output_dir: "${cohort_dir}"
+    discharge_code: "DISCHARGE//VE"
+    reg_code: "REGISTER//REG"
+    output_dir: ${cohort_dir}/prep_reg_cohort
+    
+  add_embedding_columns:
+    description: |-
+    token_type_mapping: {
+        PAD: 0,
+        CLASS: 1,
+        ADMISSION: 2,
+        DISCHARGE: 3,
+        INTERVAL: 4,
+        LAB: 5,
+        MEDICATION: 6,
+        INTERVENTION: 7,
+        REGISTER: 8,
+    }
+    reference_year: 1930
+    reference_month: 1
+    reference_day: 1
+    output_dir: ${cohort_dir}/prep_embedding_cohort
+    
+  filter_labs:
+    output_dir: ${cohort_dir}/prep_labs_cohort
+    lab_codes_file: ${cohort_dir}/filtered_lab.json
+    
+  quantize_lab_values:
+    output_dir: ${cohort_dir}/prep_quant_cohort
+    bins_number: 4
+    lab_minmax_file: ${cohort_dir}/filtered_lab_values.json
+    
+  generate_sequence:
+    output_dir: ${cohort_dir}/sequence_cohort
+    
+  # collect_code_metadata:
+  #   description: |-
+  #     This stage collects some descriptive metadata about the codes in the cohort. Arguments:
+  #       - `aggregations`: The aggregations to compute over the codes. Defaults to counts of code occurrences,
+  #         counts of patients with the code, and counts of value occurrences per code, as well as the sum and
+  #         sum of squares of values (for use in computing means and variances).
+  #   aggregations:
+  #     - "code/n_occurrences"
+  #     - "code/n_patients"
+  #     - "values/n_occurrences"
+  #     - "values/sum"
+  #     - "values/sum_sqd"
+  #   do_summarize_over_all_codes: true # This indicates we should include overall, code-independent counts
+  #   is_metadata: True
+  #   mapper_output_dir: "${cohort_dir}/code_metadata"
+  #   output_dir: "${cohort_dir}"

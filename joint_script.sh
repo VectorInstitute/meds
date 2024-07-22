@@ -39,13 +39,101 @@ N_PARALLEL_WORKERS="$3"
 GEMINI_EVENT_CONFIGS=./GEMINI_Example/configs/event_configs.yaml
 
 shift 3
-
+export  HYDRA_FULL_ERROR=1 
 source ~/myenv/bin/activate
 # echo "Running pre-MEDS conversion."
 # ./MIMIC-IV_Example/pre_MEDS.py raw_cohort_dir="$MIMICIV_RAW_DIR" output_dir="$MIMICIV_PREMEDS_DIR"
 
-echo "Running shard_events.py with $N_PARALLEL_WORKERS workers in parallel"
-./scripts/extraction/shard_events.py \
+# echo "Running shard_events.py with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/shard_events.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+# echo "Splitting patients in serial"
+# ./scripts/extraction/split_and_shard_patients.py \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+# echo "Converting to sharded events with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/convert_to_sharded_events.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+# echo "Merging to a MEDS cohort with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/merge_to_MEDS_cohort.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+# echo "Filtering rows and cols with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/filter_rows_and_cols.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+# echo "Filtering patients with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/filter_patients.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+
+# echo "Adding time intervals with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/add_time_interval.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+# echo "Adding REG column with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/add_reg.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+# echo "Adding embedding columns with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/add_embedding_columns.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+# echo "Filtering labs with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/filter_labs.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+echo "Quantizing lab values with $N_PARALLEL_WORKERS workers in parallel"
+./scripts/extraction/quantize_lab_values.py \
     --multirun \
     worker="range(0,$N_PARALLEL_WORKERS)" \
     hydra/launcher=joblib \
@@ -53,23 +141,8 @@ echo "Running shard_events.py with $N_PARALLEL_WORKERS workers in parallel"
     cohort_dir="$GEMINI_MEDS_DIR" \
     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
 
-echo "Splitting patients in serial"
-./scripts/extraction/split_and_shard_patients.py \
-    input_dir="$GEMINI_PREMEDS_DIR" \
-    cohort_dir="$GEMINI_MEDS_DIR" \
-    event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
-
-echo "Converting to sharded events with $N_PARALLEL_WORKERS workers in parallel"
-./scripts/extraction/convert_to_sharded_events.py \
-    --multirun \
-    worker="range(0,$N_PARALLEL_WORKERS)" \
-    hydra/launcher=joblib \
-    input_dir="$GEMINI_PREMEDS_DIR" \
-    cohort_dir="$GEMINI_MEDS_DIR" \
-    event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
-
-echo "Merging to a MEDS cohort with $N_PARALLEL_WORKERS workers in parallel"
-./scripts/extraction/merge_to_MEDS_cohort.py \
+echo "Aggregating sequences with $N_PARALLEL_WORKERS workers in parallel"
+./scripts/extraction/generate_sequence.py \
     --multirun \
     worker="range(0,$N_PARALLEL_WORKERS)" \
     hydra/launcher=joblib \

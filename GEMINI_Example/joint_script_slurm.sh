@@ -44,41 +44,158 @@ shift 3
 # this doesn't fall back on running anything locally in a setting where only slurm worker nodes have
 # sufficient computational resources to run the actual jobs.
 
-# echo "Running pre-MEDS conversion on one worker."
-# ./MIMIC-IV_Example/pre_MEDS.py \
-#   --multirun \
-#   worker="range(0,1)" \
-#   hydra/launcher=submitit_slurm \
-#   hydra.launcher.timeout_min=60 \
-#   hydra.launcher.cpus_per_task=10 \
-#   hydra.launcher.mem_gb=50 \
-#   hydra.launcher.partition="short" \
-#   raw_cohort_dir="$GEMINI_RAW_DIR" \
-#   output_dir="$GEMINI_PREMEDS_DIR"
 
 echo "Trying submitit launching with $N_PARALLEL_WORKERS jobs."
 GEMINI_EVENT_CONFIGS=./GEMINI_Example/configs/event_configs.yaml
 
 source ~/myenv/bin/activate
 
-./scripts/extraction/shard_events.py \
+# ./scripts/extraction/shard_events.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     "hydra.job.env_copy=[PATH]" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" \
+#     stage=shard_events
+
+# echo "Splitting patients on one worker"
+# ./scripts/extraction/split_and_shard_patients.py \
+#     --multirun \
+#     worker="range(0,1)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
+#     stage=split_and_shard_patients
+
+# echo "Converting to sharded events with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/convert_to_sharded_events.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
+#     stage=convert_to_sharded_events
+
+# echo "Merging to a MEDS cohort with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/merge_to_MEDS_cohort.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
+#     stage=merge_to_MEDS_cohort
+
+
+# echo "Filtering rows and cols with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/filter_rows_and_cols.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
+#     stage=filter_rows_and_cols
+    
+
+# echo "Filtering patients with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/filter_patients.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
+#     stage=filter_patients
+    
+# echo "Adding time intervals cohort with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/add_time_interval.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
+#     stage=add_time_interval
+    
+# echo "Adding REG column with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/add_reg.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
+#     stage=add_reg
+    
+# echo "Adding Embedding columns with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/add_embedding_columns.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
+#     stage=add_embedding_columns
+    
+# echo "Filtering labs with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/filter_labs.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=submitit_slurm \
+#     hydra.launcher.timeout_min=60 \
+#     hydra.launcher.cpus_per_task=5 \
+#     hydra.launcher.mem_gb=40 \
+#     hydra.launcher.partition="gpu" \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
+#     stage=filter_labs
+    
+echo "Quantizing lab values with $N_PARALLEL_WORKERS workers in parallel"
+./scripts/extraction/quantize_lab_values.py \
     --multirun \
     worker="range(0,$N_PARALLEL_WORKERS)" \
-    hydra/launcher=submitit_slurm \
-    hydra.launcher.timeout_min=60 \
-    hydra.launcher.cpus_per_task=5 \
-    hydra.launcher.mem_gb=40 \
-    hydra.launcher.partition="gpu" \
-    "hydra.job.env_copy=[PATH]" \
-    input_dir="$GEMINI_PREMEDS_DIR" \
-    cohort_dir="$GEMINI_MEDS_DIR" \
-    event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" \
-    stage=shard_events
-
-echo "Splitting patients on one worker"
-./scripts/extraction/split_and_shard_patients.py \
-    --multirun \
-    worker="range(0,1)" \
     hydra/launcher=submitit_slurm \
     hydra.launcher.timeout_min=60 \
     hydra.launcher.cpus_per_task=5 \
@@ -87,10 +204,10 @@ echo "Splitting patients on one worker"
     input_dir="$GEMINI_PREMEDS_DIR" \
     cohort_dir="$GEMINI_MEDS_DIR" \
     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
-    stage=split_and_shard_patients
-
-echo "Converting to sharded events with $N_PARALLEL_WORKERS workers in parallel"
-./scripts/extraction/convert_to_sharded_events.py \
+    stage=quantize_lab_values
+    
+echo "Aggregating sequences with $N_PARALLEL_WORKERS workers in parallel"
+./scripts/extraction/generate_sequence.py \
     --multirun \
     worker="range(0,$N_PARALLEL_WORKERS)" \
     hydra/launcher=submitit_slurm \
@@ -101,18 +218,4 @@ echo "Converting to sharded events with $N_PARALLEL_WORKERS workers in parallel"
     input_dir="$GEMINI_PREMEDS_DIR" \
     cohort_dir="$GEMINI_MEDS_DIR" \
     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
-    stage=convert_to_sharded_events
-
-echo "Merging to a MEDS cohort with $N_PARALLEL_WORKERS workers in parallel"
-./scripts/extraction/merge_to_MEDS_cohort.py \
-    --multirun \
-    worker="range(0,$N_PARALLEL_WORKERS)" \
-    hydra/launcher=submitit_slurm \
-    hydra.launcher.timeout_min=60 \
-    hydra.launcher.cpus_per_task=5 \
-    hydra.launcher.mem_gb=40 \
-    hydra.launcher.partition="gpu" \
-    input_dir="$GEMINI_PREMEDS_DIR" \
-    cohort_dir="$GEMINI_MEDS_DIR" \
-    event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@" \
-    stage=merge_to_MEDS_cohort
+    stage=generate_sequence
