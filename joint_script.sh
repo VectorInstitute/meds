@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# This makes the script fail if any internal script fails
-set -e
+# This makes the script fail if any internal script fails but keeps terminal alive
+set +e
 
 # Function to display help message
 function display_help() {
@@ -40,7 +40,10 @@ GEMINI_EVENT_CONFIGS=./GEMINI_Example/configs/event_configs.yaml
 
 shift 3
 export  HYDRA_FULL_ERROR=1 
-source ~/myenv/bin/activate
+
+# Activate your enviornment
+conda activate myenv
+
 # echo "Running pre-MEDS conversion."
 # ./MIMIC-IV_Example/pre_MEDS.py raw_cohort_dir="$MIMICIV_RAW_DIR" output_dir="$MIMICIV_PREMEDS_DIR"
 
@@ -132,20 +135,29 @@ source ~/myenv/bin/activate
 #     cohort_dir="$GEMINI_MEDS_DIR" \
 #     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
 
-echo "Quantizing lab values with $N_PARALLEL_WORKERS workers in parallel"
-./scripts/extraction/quantize_lab_values.py \
-    --multirun \
-    worker="range(0,$N_PARALLEL_WORKERS)" \
-    hydra/launcher=joblib \
-    input_dir="$GEMINI_PREMEDS_DIR" \
-    cohort_dir="$GEMINI_MEDS_DIR" \
-    event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+# echo "Quantizing lab values with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/quantize_lab_values.py \
+#     --multirun \
+#     worker="range(0,$N_PARALLEL_WORKERS)" \
+#     hydra/launcher=joblib \
+#     input_dir="$GEMINI_PREMEDS_DIR" \
+#     cohort_dir="$GEMINI_MEDS_DIR" \
+#     event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
 
-echo "Aggregating sequences with $N_PARALLEL_WORKERS workers in parallel"
-./scripts/extraction/generate_sequence.py \
-    --multirun \
-    worker="range(0,$N_PARALLEL_WORKERS)" \
-    hydra/launcher=joblib \
-    input_dir="$GEMINI_PREMEDS_DIR" \
-    cohort_dir="$GEMINI_MEDS_DIR" \
-    event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+# echo "Aggregating sequences with $N_PARALLEL_WORKERS workers in parallel"
+# ./scripts/extraction/generate_sequence.py \
+#   --multirun \
+#   worker="range(0,$N_PARALLEL_WORKERS)" \
+#   hydra/launcher=joblib \
+#   input_dir="$GEMINI_PREMEDS_DIR" \
+#   cohort_dir="$GEMINI_MEDS_DIR" \
+#   event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"
+
+echo "Merge and process sequences with $N_PARALLEL_WORKERS workers in parallel"
+./scripts/extraction/merge_process_sequence.py \
+  --multirun \
+  worker="range(0,$N_PARALLEL_WORKERS)" \
+  hydra/launcher=joblib \
+  input_dir="$GEMINI_MEDS_DIR" \
+  cohort_dir="$GEMINI_MEDS_DIR" \
+  event_conversion_config_fp="$GEMINI_EVENT_CONFIGS" "$@"

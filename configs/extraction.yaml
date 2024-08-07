@@ -32,6 +32,7 @@ stages:
   - filter_labs
   - quantize_lab_values
   - generate_sequence
+  - merge_process_sequence
   # - collect_code_metadata
 
 stage_configs:
@@ -128,6 +129,9 @@ stage_configs:
     lab_minmax_file: ${cohort_dir}/filtered_lab_values.json
     
   generate_sequence:
+    output_dir: ${cohort_dir}/sequence_cohort
+  
+  merge_process_sequence:
     output_dir: ${cohort_dir}/sequence_cohort
     
   # collect_code_metadata:

@@ -73,9 +73,10 @@ def main(cfg: DictConfig):
         raise FileNotFoundError(f"Input cohort directory not found: {input_dir}")
 
     code_fn = add_code_token_column()
+    lab_fn = update_lab_code()
     agg_fn = aggregate_fntr()
 
-    compute_fns = [code_fn, update_lab_code, agg_fn]
+    compute_fns = [code_fn, lab_fn, agg_fn]
 
     for sp in ["train"]:
         in_dir = input_dir / sp
@@ -95,7 +96,7 @@ def main(cfg: DictConfig):
                 cache_intermediate=False,
                 do_overwrite=cfg.do_overwrite,
             )
-            break
+            # break
             
     logger.info("Aggregation completed.")
 

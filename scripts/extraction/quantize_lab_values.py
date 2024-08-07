@@ -6,6 +6,15 @@ from pathlib import Path
 from datetime import datetime
 from typing import Callable
 from polars import StringCache
+import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
+import polars as pl
+from pathlib import Path
+import time
+from typing import Dict, Callable, List, Optional, Any
+from tqdm import tqdm
+import gc
 
 import hydra
 import polars as pl
@@ -18,12 +27,14 @@ from MEDS_polars_functions.utils import hydra_loguru_init, write_lazyframe
 
 pl.enable_string_cache()
 
+
 def quantize_lab_values_fntr(bins: set) -> Callable[[pl.LazyFrame], pl.LazyFrame]:
     """Create a function that quantizes the lab values into specified bins for each LAB code.
     """
     def fn(df: pl.LazyFrame) -> pl.LazyFrame:
         lab_codes = df.filter(pl.col('code').cast(pl.Utf8).str.contains('^LAB//')).select('code').unique().collect().to_series()
         updated_frames = []
+
         for code in lab_codes:
             lab_df = df.filter(pl.col('code') == code)
 
@@ -37,28 +48,37 @@ def quantize_lab_values_fntr(bins: set) -> Callable[[pl.LazyFrame], pl.LazyFrame
             bin_labels = bins[code_suffix].get("bin_labels")
             
             if bin_edges is None:
-                logger.warning(f"Min and max values are equal for lab code {code}. Keeping lab_value unchanged.")
+                logger.warning(f"Min and max values are equal for lab code {code}. Casting lab_value to string.")
                 valid_lab_df = valid_lab_df.with_columns(
-                    pl.col('lab_value').alias('binned_lab_value')
+                    pl.col('lab_value').cast(pl.Int64).cast(pl.Utf8).alias('binned_lab_value')
                 )
+
             else:
                 valid_lab_df = valid_lab_df.with_columns(
                     pl.Expr.cut(pl.col('lab_value'),
                     breaks=bin_edges, 
                     labels=bin_labels,
-                    include_breaks=False).alias('binned_lab_value')
+                    include_breaks=False).cast(pl.Utf8).alias('binned_lab_value')
                 )
+
             updated_frames.append(valid_lab_df)
-            unchanged_df = df.filter(~pl.col('code').str.contains('^LAB//') | pl.col('lab_value').is_null())
+
+        unchanged_df = df.filter(~pl.col('code').cast(pl.Utf8).str.contains('^LAB//') | pl.col('lab_value').is_null())
+        unchanged_df = unchanged_df.with_columns(
+            pl.col('lab_value').cast(pl.Utf8).cast(pl.Float64).alias('lab_value')
+        )
+
         return (
             pl.concat(updated_frames + [unchanged_df], how="diagonal")
             .sort(by=["patient_id", "timestamp"])
         )
-    
+
     return fn
 
-def write_fn(df: pl.DataFrame, out_fp: Path) -> None:
+
+def write_fn(df: pl.LazyFrame, out_fp: Path) -> None:
     df.collect().write_parquet(out_fp, use_pyarrow=True)
+
 
 @hydra.main(version_base=None, config_path="../../configs", config_name="extraction")
 def main(cfg: DictConfig):
@@ -129,8 +149,8 @@ def main(cfg: DictConfig):
                 do_overwrite=cfg.do_overwrite,
             )
             
-            break
-        break
+            # break
+        # break
     logger.info("Quantization completed.")
 
 if __name__ == "__main__":
