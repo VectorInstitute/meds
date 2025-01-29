@@ -1,0 +1,2 @@
+add_cls_token:
+  cls_code: "[CLS]"

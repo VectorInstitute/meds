@@ -1,0 +1,3 @@
+quantize_labs:
+  bins_number: 5
+  lab_minmax_file: null

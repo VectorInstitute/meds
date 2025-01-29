@@ -1,0 +1,5 @@
+add_age:
+  age_row:
+    DOB_code: "MEDS_BIRTH" # This is the MEDS official code for BIRTH
+    age_unit: "years"
+    age_code: "AGE"

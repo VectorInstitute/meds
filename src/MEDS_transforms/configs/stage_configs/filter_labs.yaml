@@ -1,0 +1,2 @@
+filter_labs:
+  filter_nan_values: True
