@@ -20,7 +20,6 @@ The stage configuration arguments will be as given in the yaml block below:
 from functools import partial
 
 from meds import code_metadata_filepath, subject_splits_filepath
-
 from tests import RUNNER_SCRIPT, USE_LOCAL_SCRIPTS
 from tests.MEDS_Transforms import (
     ADD_TIME_DERIVED_MEASUREMENTS_SCRIPT,

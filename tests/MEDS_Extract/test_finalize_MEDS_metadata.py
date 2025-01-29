@@ -7,9 +7,9 @@ scripts.
 from datetime import datetime
 
 import polars as pl
+
 from meds import __version__ as MEDS_VERSION
 from meds import code_metadata_filepath, dataset_metadata_filepath, subject_splits_filepath
-
 from MEDS_transforms.utils import get_package_version as get_meds_transform_version
 from tests.MEDS_Extract import FINALIZE_METADATA_SCRIPT
 from tests.utils import single_stage_tester

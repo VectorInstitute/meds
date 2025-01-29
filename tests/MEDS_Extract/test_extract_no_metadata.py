@@ -11,9 +11,9 @@ from io import StringIO
 from pathlib import Path
 
 import polars as pl
+
 from meds import __version__ as MEDS_VERSION
 from meds import code_metadata_filepath, dataset_metadata_filepath, subject_splits_filepath
-
 from tests.MEDS_Extract import (
     CONVERT_TO_SHARDED_EVENTS_SCRIPT,
     EXTRACT_CODE_METADATA_SCRIPT,

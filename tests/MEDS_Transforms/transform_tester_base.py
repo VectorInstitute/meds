@@ -9,8 +9,8 @@ from io import StringIO
 from pathlib import Path
 
 import polars as pl
-from meds import subject_id_field, subject_splits_filepath
 
+from meds import subject_id_field, subject_splits_filepath
 from tests.utils import FILE_T, multi_stage_tester, parse_shards_yaml, single_stage_tester
 
 # Test MEDS data (inputs)

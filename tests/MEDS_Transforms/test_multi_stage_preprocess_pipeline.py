@@ -20,9 +20,9 @@ The stage configuration arguments will be as given in the yaml block below:
 from datetime import datetime
 
 import polars as pl
-from meds import subject_id_field
 from nested_ragged_tensors.ragged_numpy import JointNestedRaggedTensorDict
 
+from meds import subject_id_field
 from tests.MEDS_Transforms import (
     ADD_TIME_DERIVED_MEASUREMENTS_SCRIPT,
     AGGREGATE_CODE_METADATA_SCRIPT,
