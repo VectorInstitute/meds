@@ -77,6 +77,11 @@ def stage_init(cfg: DictConfig) -> tuple[Path, Path, Path]:
     input_dir = Path(cfg.stage_cfg.data_input_dir)
     output_dir = Path(cfg.stage_cfg.output_dir)
     metadata_input_dir = Path(cfg.stage_cfg.metadata_input_dir)
+    logger.info("**************************")
+    logger.info("Input directory: {input_dir}")
+    logger.info("Output directory: {output_dir}")
+    logger.info("Metadata input directory: {metadata_input_dir}")
+    logger.info("**************************")
 
     def chk(x: Path):
         return "✅" if x.exists() else "❌"
@@ -415,7 +420,27 @@ def get_shard_prefix(base_path: Path, fp: Path) -> str:
     relative_parent = relative_path.parent
     file_name = relative_path.name.split(".")[0]
 
+    # return str(relative_parent / file_name)
+    file_name = file_name.split("-")[0]
     return str(relative_parent / file_name)
+
+
+def get_batch_no(base_path: Path, fp: Path) -> str:
+    """Extracts the batch number from a file path by removing the raw_cohort_dir.
+
+    Args:
+        base_path: The base path to remove.
+        fp: The file path to extract the shard prefix from.
+
+    Returns:
+        The batch number (the file path relative to the base path with the suffix removed).
+    """
+
+    relative_path = fp.relative_to(base_path)
+    file_name = relative_path.name.split(".")[0]
+    if "-" in file_name:
+        return file_name.split("-")[1]
+    return ""
 
 
 def is_col_field(field: str | None) -> bool:

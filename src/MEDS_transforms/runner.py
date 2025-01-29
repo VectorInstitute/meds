@@ -61,7 +61,7 @@ def get_script_from_name(stage_name: str) -> str | None:
             return f"MEDS_transform-{stage_name}"
         except ImportError:
             pass
-
+    logger.error(f"Could not find a script for stage {pfx}.")
     raise ValueError(f"Could not find a script for stage {stage_name}.")
 
 
@@ -317,17 +317,25 @@ def main(cfg: DictConfig):
     else:
         default_parallelization_cfg = None
 
-    for stage in stages:
-        done_file = log_dir / f"{stage}.done"
+    try:
+        for stage in stages:
+            done_file = log_dir / f"{stage}.done"
 
-        if done_file.exists():
-            logger.info(f"Skipping stage {stage} as it is already complete.")
-        else:
-            logger.info(f"Running stage: {stage}")
-            run_stage(cfg, stage, default_parallelization_cfg=default_parallelization_cfg)
-            done_file.touch()
+            if done_file.exists():
+                logger.info(f"Skipping stage {stage} as it is already complete.")
+            else:
+                logger.info(f"Running stage: {stage}")
+                try:
+                    run_stage(cfg, stage, default_parallelization_cfg=default_parallelization_cfg)
+                    done_file.touch()
+                except Exception as e:
+                    logger.error(f"Stage {stage} failed: {e}")
+                    raise
 
-    global_done_file.touch()
+        global_done_file.touch()
+    except Exception as e:
+        logger.error(f"Pipeline failed: {e}")
+        raise
 
 
 def load_yaml_file(path: str | None) -> dict | DictConfig:

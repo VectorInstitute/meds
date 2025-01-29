@@ -11,8 +11,9 @@ from typing import Any, NotRequired, TypedDict, TypeVar
 import hydra
 import polars as pl
 from loguru import logger
-from meds import subject_id_field, subject_splits_filepath
 from omegaconf import DictConfig, ListConfig
+
+from meds import subject_id_field, subject_splits_filepath
 
 from ..parser import is_matcher, matcher_to_expr
 from ..utils import stage_init, write_lazyframe
