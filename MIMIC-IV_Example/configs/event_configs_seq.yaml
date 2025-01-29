@@ -1,0 +1,120 @@
+subject_id_col: subject_id
+
+hosp/diagnoses_icd:
+  diagnosis:
+    code:
+      - DIAGNOSIS
+      - col(icd_code)
+    time: col(hadm_discharge_time)
+    time_format: "%Y-%m-%d %H:%M:%S"
+
+hosp/labevents:
+  lab:
+    code:
+      - LAB
+      - col(itemid)
+    time: col(charttime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    numeric_value: valuenum
+
+hosp/patients:
+  dob:
+    code: MEDS_BIRTH # This is the MEDS official code for birth.
+    time: col(year_of_birth)
+    time_format: "%Y"
+  death:
+    code: MEDS_DEATH # This is the MEDS official code for death.
+    time: col(dod)
+    time_format:
+      - "%Y-%m-%d %H:%M:%S"
+      - "%Y-%m-%d"
+
+hosp/prescriptions:
+  medication_start:
+    code:
+      - MEDICATION
+      - START
+      - col(ndc)
+    time: col(starttime)
+    time_format:
+      - "%Y-%m-%d %H:%M:%S"
+      - "%Y-%m-%d"
+  medication_stop:
+    code:
+      - MEDICATION
+      - STOP
+      - col(ndc)
+    time: col(stoptime)
+    time_format:
+      - "%Y-%m-%d %H:%M:%S"
+      - "%Y-%m-%d"
+
+hosp/procedures_icd:
+  procedure:
+    code:
+      - PROCEDURE
+      - col(icd_code)
+    time: col(chartdate)
+    time_format: "%Y-%m-%d"
+
+hosp/transfers:
+  transfer:
+    code:
+      - TRANSFER_TO
+      - col(eventtype)
+      - col(careunit)
+    time: col(intime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+
+icu/icustays:
+  icu_admission:
+    code:
+      - ICU
+      - admit
+    time: col(intime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+  icu_discharge:
+    code:
+      - ICU
+      - discharge
+    time: col(outtime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+
+icu/chartevents:
+  event:
+    code:
+      - LAB
+      - col(itemid)
+    time: col(charttime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    numeric_value: valuenum
+
+icu/procedureevents:
+  start:
+    code:
+      - PROCEDURE
+      - START
+      - col(itemid)
+    time: col(starttime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+  end:
+    code:
+      - PROCEDURE
+      - END
+      - col(itemid)
+    time: col(endtime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+
+icu/inputevents:
+  input_start:
+    code:
+      - INFUSION_START
+      - col(itemid)
+    time: col(starttime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+  input_end:
+    code:
+      - INFUSION_END
+      - col(itemid)
+    time: col(endtime)
+    time_format: "%Y-%m-%d %H:%M:%S"

@@ -9,14 +9,14 @@ description: |-
   ```bash
     export EVENT_CONVERSION_CONFIG_FP=# Path to your event conversion config
     export MIMICIV_PRE_MEDS_DIR=# Path to the output dir of the pre-MEDS step
-    export MIMICIV_MEDS_COHORT_DIR=# Path to where you want the dataset to live
+    export MIMICIV_MEDS_EXTRACT_DIR=# Path to where you want the dataset to live
   ```
 
 # The event conversion configuration file is used throughout the pipeline to define the events to extract.
 event_conversion_config_fp: ${oc.env:EVENT_CONVERSION_CONFIG_FP}
 
 input_dir: ${oc.env:MIMICIV_PRE_MEDS_DIR}
-cohort_dir: ${oc.env:MIMICIV_MEDS_COHORT_DIR}
+cohort_dir: ${oc.env:MIMICIV_MEDS_EXTRACT_DIR}
 
 etl_metadata:
   dataset_name: MIMIC-IV
@@ -24,15 +24,19 @@ etl_metadata:
 
 stage_configs:
   shard_events:
-    infer_schema_length: 999999999
+    infer_schema_length: 10000
   split_and_shard_subjects:
-    n_subjects_per_shard: 1000
+    n_subjects_per_shard: 5000
+    split_fracs:
+      train: 1
+      tuning: 0
+      held_out: 0
 
 stages:
   - shard_events
   - split_and_shard_subjects
   - convert_to_sharded_events
   - merge_to_MEDS_cohort
-  - extract_code_metadata
-  - finalize_MEDS_metadata
+  # - extract_code_metadata
+  # - finalize_MEDS_metadata
   - finalize_MEDS_data

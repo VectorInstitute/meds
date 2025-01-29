@@ -1,0 +1,51 @@
+defaults:
+  - _preprocess
+  - _self_
+
+description: |-
+  This pipeline preprocessed the MIMIC-IV dataset by setting environment variables:
+  ```bash
+    export EVENT_CONVERSION_CONFIG_FP=# Path to your event conversion config
+    export MIMICIV_MEDS_EXTRACT_DIR=# Path to the output dir of the extract step
+    export MIMICIV_MEDS_PREP_DIR=# Path to where you want the preprocessed dataset to live
+  ```
+
+# The event conversion configuration file is used throughout the pipeline to define the events to extract.
+event_conversion_config_fp: ${oc.env:EVENT_CONVERSION_CONFIG_FP}
+
+input_dir: ${oc.env:MIMICIV_MEDS_EXTRACT_DIR}
+cohort_dir: ${oc.env:MIMICIV_MEDS_PREP_DIR}
+
+etl_metadata:
+  dataset_name: MIMIC-IV
+  dataset_version: 2.2
+
+stage_configs:
+  filter_codes:
+    codes_to_filter: ["MEDS_DEATH"]
+  filter_subjects:
+    min_events_per_subject: 1
+    min_measurements_per_subject: 13
+  filter_labs:
+    filter_nan_values: True
+  filter_meds:
+    codes_to_filter: ["0"]
+  quantize_labs:
+    is_qa: False
+    bins_number: 5
+    lab_minmax_file: "/mnt/data/meds_transforms/test/processed/lab_min_max.json"
+  add_time_tokens:
+    hour_bins_file: "/mnt/data/meds_transforms/patient_sequence/preprocessed/hour2bin.json"
+    minute_bins_file: "/mnt/data/meds_transforms/patient_sequence/preprocessed/minute2bin.json"
+
+stages:
+  - filter_codes
+  - filter_subjects
+  - filter_labs
+  - filter_meds
+  - update_transfers
+  - add_age
+  - add_cls_token
+  - quantize_labs
+  - add_time_tokens
+  - generate_sequence

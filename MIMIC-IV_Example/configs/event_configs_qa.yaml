@@ -1,0 +1,213 @@
+subject_id_col: subject_id
+hosp/admissions:
+  ed_registration:
+    code: ED_REGISTRATION
+    time: col(edregtime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+  ed_out:
+    code: ED_OUT
+    time: col(edouttime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+  admission:
+    code:
+      - HOSPITAL_ADMISSION
+      - col(admission_type)
+      - col(admission_location)
+    time: col(admittime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    insurance: insurance
+    language: language
+    marital_status: marital_status
+    race: race
+    hadm_id: hadm_id
+  discharge:
+    code:
+      - HOSPITAL_DISCHARGE
+      - col(discharge_location)
+    time: col(dischtime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    hadm_id: hadm_id
+  # We omit the death event here as it is joined to the data in the subjects table in the pre-MEDS step.
+
+hosp/diagnoses_icd:
+  diagnosis:
+    code:
+      - HOSPITAL
+      - DIAGNOSIS
+      - ICD
+      - col(icd_version)
+      - col(icd_code)
+    hadm_id: hadm_id
+    description: col(long_title)
+    time: col(hadm_discharge_time)
+    time_format: "%Y-%m-%d %H:%M:%S"
+
+hosp/labevents:
+  lab:
+    code:
+      - HOSPITAL
+      - LAB
+      - col(itemid)
+      # - col(valueuom)
+    hadm_id: hadm_id
+    loinc: col(omop_concept_code)
+    time: col(charttime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    numeric_value: valuenum
+    description: col(omop_concept_name)
+    label: col(label)
+
+hosp/patients:
+  gender:
+    code:
+      - GENDER
+      - col(gender)
+    time: null
+  dob:
+    code: MEDS_BIRTH # This is the MEDS official code for birth.
+    time: col(year_of_birth)
+    time_format: "%Y"
+  death:
+    code: MEDS_DEATH # This is the MEDS official code for death.
+    time: col(dod)
+    time_format:
+      - "%Y-%m-%d %H:%M:%S"
+      - "%Y-%m-%d"
+
+hosp/prescriptions:
+  medication_start:
+    code:
+      - HOSPITAL
+      - MEDICATION
+      - START
+      - col(ndc)
+    description: col(medication)
+    formulary_drug_cd: col(formulary_drug_cd)
+    time: col(starttime)
+    time_format:
+      - "%Y-%m-%d %H:%M:%S"
+      - "%Y-%m-%d"
+  medication_stop:
+    code:
+      - HOSPITAL
+      - MEDICATION
+      - STOP
+      - col(ndc)
+    description: col(medication)
+    formulary_drug_cd: col(formulary_drug_cd)
+    time: col(stoptime)
+    time_format:
+      - "%Y-%m-%d %H:%M:%S"
+      - "%Y-%m-%d"
+
+hosp/procedures_icd:
+  procedure:
+    code:
+      - HOSPITAL
+      - PROCEDURE
+      - ICD
+      - col(icd_version)
+      - col(icd_code)
+    hadm_id: hadm_id
+    description: col(long_title)
+    time: col(chartdate)
+    time_format: "%Y-%m-%d"
+
+hosp/transfers:
+  transfer:
+    code:
+      - TRANSFER_TO
+      - col(eventtype)
+      - col(careunit)
+    time: col(intime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    hadm_id: hadm_id
+
+icu/icustays:
+  icu_admission:
+    code:
+      - ICU
+      - ADMIT
+      # - col(first_careunit)
+    time: col(intime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    hadm_id: hadm_id
+    icustay_id: stay_id
+  icu_discharge:
+    code:
+      - ICU
+      - DISCHARGE
+      # - col(last_careunit)
+    time: col(outtime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    hadm_id: hadm_id
+    icustay_id: stay_id
+
+icu/chartevents:
+  event:
+    code:
+      - ICU
+      - LAB
+      - col(itemid)
+    time: col(charttime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    loinc: col(omop_concept_code)
+    description: col(omop_concept_name)
+    label: col(label)
+    numeric_value: valuenum
+    hadm_id: hadm_id
+    icustay_id: stay_id
+
+icu/procedureevents:
+  start:
+    code:
+      - ICU
+      - PROCEDURE
+      - START
+      - col(itemid)
+    time: col(starttime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    snomed: col(omop_concept_code)
+    description: col(omop_concept_name)
+    label: col(label)
+    hadm_id: hadm_id
+    icustay_id: stay_id
+  end:
+    code:
+      - ICU
+      - PROCEDURE
+      - END
+      - col(itemid)
+    time: col(endtime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    snomed: col(omop_concept_code)
+    description: col(omop_concept_name)
+    label: col(label)
+    hadm_id: hadm_id
+    icustay_id: stay_id
+
+icu/inputevents:
+  input_start:
+    code:
+      - ICU
+      - INFUSION_START
+      - col(itemid)
+    time: col(starttime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    rxnorm: col(omop_concept_code)
+    description: col(omop_concept_name)
+    label: col(label)
+    hadm_id: hadm_id
+    icustay_id: stay_id
+  input_end:
+    code:
+      - ICU
+      - INFUSION_END
+      - col(itemid)
+    time: col(endtime)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    rxnorm: col(omop_concept_code)
+    description: col(omop_concept_name)
+    label: col(label)
+    hadm_id: hadm_id
+    icustay_id: stay_id

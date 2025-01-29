@@ -1,7 +1,12 @@
 input_dir: ${oc.env:MIMICIV_RAW_DIR}
 cohort_dir: ${oc.env:MIMICIV_PRE_MEDS_DIR}
 
-do_overwrite: false
+do_overwrite: true
+
+batches:
+  hosp/labevents: 14
+  icu/chartevents: 30
+  digits: 2
 
 log_dir: ${cohort_dir}/.logs
 
