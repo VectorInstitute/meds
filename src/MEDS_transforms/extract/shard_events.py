@@ -11,9 +11,9 @@ from pathlib import Path
 import hydra
 import polars as pl
 from loguru import logger
-from meds import subject_id_field
 from omegaconf import DictConfig, OmegaConf
 
+from meds import subject_id_field
 from MEDS_transforms.extract import CONFIG_YAML
 from MEDS_transforms.mapreduce.mapper import rwlock_wrap
 from MEDS_transforms.utils import (
@@ -349,10 +349,11 @@ def main(cfg: DictConfig):
     for fmt in ["parquet", "csv", "csv.gz"]:
         files_in_fmt = set(list(raw_cohort_dir.glob(f"*.{fmt}")) + list(raw_cohort_dir.glob(f"**/*.{fmt}")))
         for f in files_in_fmt:
-            if get_shard_prefix(raw_cohort_dir, f) in seen_files:
-                logger.warning(f"Skipping {f} as it has already been added in a preferred format.")
-                continue
-            elif get_shard_prefix(raw_cohort_dir, f) not in prefix_to_columns:
+            # if get_shard_prefix(raw_cohort_dir, f) in seen_files:
+            #     logger.warning(f"Skipping {f} as it has already been added in a preferred format.")
+            #     continue
+            # el
+            if get_shard_prefix(raw_cohort_dir, f) not in prefix_to_columns:
                 logger.warning(f"Skipping {f} as it is not specified in the event conversion configuration.")
                 continue
             else:
@@ -410,7 +411,10 @@ def main(cfg: DictConfig):
 
         for i, st in enumerate(row_shards):
             end = min(st + row_chunksize, row_count)
-            out_fp = out_dir / f"[{st}-{end}).parquet"
+            # out_fp = out_dir / f"[{st}-{end}).parquet"
+            out_filename = (input_file.name).split(".")[0]
+
+            out_fp = out_dir / f"{out_filename}.parquet"
 
             compute_fn = partial(filter_to_row_chunk, start=st, end=end)
             logger.info(

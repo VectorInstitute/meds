@@ -12,6 +12,8 @@ import polars as pl
 import pyarrow as pa
 import pyarrow.parquet as pq
 from loguru import logger
+from omegaconf import DictConfig
+
 from meds import __version__ as MEDS_VERSION
 from meds import (
     code_metadata_filepath,
@@ -22,8 +24,6 @@ from meds import (
     subject_split_schema,
     subject_splits_filepath,
 )
-from omegaconf import DictConfig
-
 from MEDS_transforms.extract import CONFIG_YAML, MEDS_METADATA_MANDATORY_TYPES
 from MEDS_transforms.utils import stage_init
 

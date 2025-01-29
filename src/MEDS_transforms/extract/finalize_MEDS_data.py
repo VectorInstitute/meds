@@ -5,9 +5,9 @@ import hydra
 import polars as pl
 import pyarrow as pa
 import pyarrow.parquet as pq
-from meds import data_schema
 from omegaconf import DictConfig
 
+from meds import data_schema
 from MEDS_transforms.extract import CONFIG_YAML, MEDS_DATA_MANDATORY_TYPES
 from MEDS_transforms.mapreduce.mapper import map_over
 

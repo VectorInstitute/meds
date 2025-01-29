@@ -121,16 +121,16 @@ def shard_subjects(
         split_lens = np.round(split_fracs[:-1] * n_subjects).astype(int)
         split_lens = np.append(split_lens, n_subjects - split_lens.sum())
 
-        if split_lens.min() == 0:
-            logger.warning(
-                "Some splits are empty. Adjusting splits to ensure all splits have at least 1 subject."
-            )
-            max_split = split_lens.argmax()
-            split_lens[max_split] -= 1
-            split_lens[split_lens.argmin()] += 1
+        # if split_lens.min() == 0:
+        #     logger.warning(
+        #         "Some splits are empty. Adjusting splits to ensure all splits have at least 1 subject."
+        #     )
+        #     max_split = split_lens.argmax()
+        #     split_lens[max_split] -= 1
+        #     split_lens[split_lens.argmin()] += 1
 
-        if split_lens.min() == 0:
-            raise ValueError("Unable to adjust splits to ensure all splits have at least 1 subject.")
+        # if split_lens.min() == 0:
+        #     raise ValueError("Unable to adjust splits to ensure all splits have at least 1 subject.")
 
         subjects = rng.permutation(subject_ids_to_split)
         subjects_per_split = np.split(subjects, split_lens.cumsum())

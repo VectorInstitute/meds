@@ -125,6 +125,9 @@ def get_supported_fp(root_dir: Path, file_prefix: str | Path) -> tuple[Path, Cal
         if fp.exists():
             logger.debug(f"Found file: {str(fp.resolve())}")
             return fp, READERS[suffix]
+    logger.error(
+        f"No files found with prefix: {file_prefix} and allowed suffixes {list(SupportedFileFormats)}"
+    )
     raise FileNotFoundError(
         f"No files found with prefix: {file_prefix} and allowed suffixes "
         f"{[x.value for x in SupportedFileFormats]} in root dir {str(root_dir.resolve())}"
