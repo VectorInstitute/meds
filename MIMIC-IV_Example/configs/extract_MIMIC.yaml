@@ -2,19 +2,19 @@ defaults:
   - _extract
   - _self_
 
-description: |-
-  This pipeline extracts the MIMIC-IV dataset in longitudinal, sparse form from an input dataset meeting
-  select criteria and converts them to the flattened, MEDS format. You can control the key arguments to this
-  pipeline by setting environment variables:
+description: |
+  This pipeline extracts the MIMIC-IV dataset in a longitudinal, sparse format and converts it to the flattened MEDS format.
+  You can configure key parameters by setting the following environment variables:
   ```bash
-    export EVENT_CONVERSION_CONFIG_FP=# Path to your event conversion config
-    export MIMICIV_PRE_MEDS_DIR=# Path to the output dir of the pre-MEDS step
-    export MIMICIV_MEDS_EXTRACT_DIR=# Path to where you want the dataset to live
+  export EVENT_CONVERSION_CONFIG_FP=<path_to_event_conversion_config>
+  export MIMICIV_PRE_MEDS_DIR=<path_to_pre_MEDS_output>
+  export MIMICIV_MEDS_EXTRACT_DIR=<path_to_final_dataset>
   ```
 
-# The event conversion configuration file is used throughout the pipeline to define the events to extract.
+# Configuration for event conversion
 event_conversion_config_fp: ${oc.env:EVENT_CONVERSION_CONFIG_FP}
 
+# Input and cohort directories
 input_dir: ${oc.env:MIMICIV_PRE_MEDS_DIR}
 cohort_dir: ${oc.env:MIMICIV_MEDS_EXTRACT_DIR}
 
@@ -37,6 +37,4 @@ stages:
   - split_and_shard_subjects
   - convert_to_sharded_events
   - merge_to_MEDS_cohort
-  # - extract_code_metadata
-  # - finalize_MEDS_metadata
   - finalize_MEDS_data

@@ -15,6 +15,7 @@ event_conversion_config_fp: ${oc.env:EVENT_CONVERSION_CONFIG_FP}
 
 input_dir: ${oc.env:MIMICIV_MEDS_EXTRACT_DIR}
 cohort_dir: ${oc.env:MIMICIV_MEDS_PREP_DIR}
+project_dir: ${oc.env:MIMIC_DIR}
 
 etl_metadata:
   dataset_name: MIMIC-IV
@@ -33,10 +34,10 @@ stage_configs:
   quantize_labs:
     is_qa: False
     bins_number: 5
-    lab_minmax_file: "/mnt/data/meds_transforms/test/processed/lab_min_max.json"
+    lab_minmax_file: "${cohort_dir}/lab_min_max.json"
   add_time_tokens:
-    hour_bins_file: "/mnt/data/meds_transforms/patient_sequence/preprocessed/hour2bin.json"
-    minute_bins_file: "/mnt/data/meds_transforms/patient_sequence/preprocessed/minute2bin.json"
+    hour_bins_file: "${project_dir}/time_bins/hour2bin.json"
+    minute_bins_file: "${project_dir}/time_bins/minute2bin.json"
 
 stages:
   - filter_codes
