@@ -17,11 +17,12 @@ from MEDS_transforms.mapreduce.mapper import map_over
 def filter_and_get_min_max_lab_values(parquet_folder_path: str, output_json_path: str):
     """Filter out lab values and get the min and max values for each lab code."""
     lab_min_max = {}
-    parquet_files = glob.glob(f"{parquet_folder_path}/*.parquet")
+    parquet_files = glob.glob(f"{parquet_folder_path}/**/*.parquet", recursive=True)
+
     for parquet_file in parquet_files:
         df = pl.scan_parquet(parquet_file)
 
-        lab_df = df.filter(pl.col("code").str.starts_with("LAB"))
+        lab_df = df.filter(pl.col("code").str.contains("LAB//"))
         lab_df_collected = lab_df.collect()
 
         for lab_code in lab_df_collected["code"].unique():
